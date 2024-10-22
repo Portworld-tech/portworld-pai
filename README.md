@@ -1,16 +1,16 @@
 # portworld-pai
 
-1. Code Download
+一. Code Download
 git clone https://github.com/Portworld-tech/portworld-pai.git
 
-2. Environment Configuration
+二. Environment Configuration
    
 sudo apt-get install repo git ssh make gcc libssl-dev liblz4-tool \
 expect g++ patchelf chrpath gawk texinfo chrpath diffstat binfmt-support \
 qemu-user-static live-build bison flex fakeroot cmake \
 unzip device-tree-compiler python-pip ncurses-dev python-pyelftools
 
-4. Debian Compilation
+三. Debian Compilation
 
 1) Kernel Compilation
    ./build.sh lunch
@@ -45,5 +45,5 @@ so select 8.
 
    After the compilation is complete, the compiled image will be generated in the rockdev directory.
 
-4. Flashing
+四. Flashing
    The flashing tool can be found at: `tools/windows/RKDevTool/RKDevTool_Release/RKDevTool.exe`
