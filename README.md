@@ -4,12 +4,13 @@
 git clone https://github.com/Portworld-tech/portworld-pai.git
 
 2. Environment Configuration
+   
 sudo apt-get install repo git ssh make gcc libssl-dev liblz4-tool \
 expect g++ patchelf chrpath gawk texinfo chrpath diffstat binfmt-support \
 qemu-user-static live-build bison flex fakeroot cmake \
 unzip device-tree-compiler python-pip ncurses-dev python-pyelftools
 
-3. Debian Compilation
+4. Debian Compilation
 
 1) Kernel Compilation
    ./build.sh lunch
