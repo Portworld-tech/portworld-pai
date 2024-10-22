@@ -1,0 +1,237 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2020 Rockchip Electronics Co., Ltd.
+ *
+ */
+
+/dts-v1/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
+#include "rk3568.dtsi"
+#include "ycx-rk3568-pai.dtsi"
+
+/ {
+	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
+	compatible = "rockchip,rk3568-evb1-ddr4-v10", "rockchip,rk3568";
+
+};
+
+&combphy0_us {
+	status = "okay";
+};
+
+&combphy1_usq {
+	status = "okay";
+};
+
+&combphy2_psq {
+	status = "okay";
+};
+
+&csi2_dphy_hw {
+	status = "okay";
+};
+
+&csi2_dphy0 {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_in_ucam0: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&ov5648_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			csidphy0_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&isp0_in>;
+			};
+		};
+	};
+};
+
+&gmac1 {
+	phy-mode = "rgmii";
+	clock_in_out = "input";
+	
+	snps,reset-gpio = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	/* Reset time is 20ms, 100ms for rtl8211f */
+	snps,reset-delays-us = <0 20000 100000>;
+	
+	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>;
+	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>, <&gmac1_clkin>;
+	assigned-clock-rates = <0>, <125000000>;
+	
+	pinctrl-names = "default";
+	pinctrl-0 = <&gmac1m1_miim
+				&gmac1m1_tx_bus2
+				&gmac1m1_rx_bus2
+				&gmac1m1_rgmii_clk
+				&gmac1m1_rgmii_bus
+				&gmac1m1_clkinout>;
+				
+	tx_delay = <0x4f>;
+	rx_delay = <0x26>;
+
+	phy-handle = <&rgmii_phy1>;
+	status = "okay";
+};
+
+&i2c2 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c2m1_xfer>;
+	
+	ov5648: ov5648@36 {
+		status = "okay";
+		compatible = "ovti,ov5648";
+		reg = <0x36>;
+		clocks = <&cru CLK_CIF_OUT>;
+		clock-names = "xvclk";
+		power-domains = <&power RK3568_PD_VI>;
+		pinctrl-names = "rockchip,camera_default";
+		pinctrl-0 = <&cif_clk>,<&ov5648_rst_gpio>, <&ov5648_pwdn_gpio>,<&ov5648_power_gpio>;
+		
+		power-gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio3 RK_PD4 GPIO_ACTIVE_LOW>;
+		pwdn-gpios  = <&gpio3 RK_PD5 GPIO_ACTIVE_HIGH>;
+		
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "LMM248";
+		rockchip,camera-module-lens-name = "YXC-M804A2";
+		port {
+			ov5648_out: endpoint {
+				remote-endpoint = <&mipi_in_ucam0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+	
+	gc2145: gc2145@3c {
+		status = "disabled";
+		compatible = "galaxycore,gc2145";
+		reg = <0x3c>;
+		clocks = <&cru CLK_CIF_OUT>;
+		clock-names = "xvclk";
+		power-domains = <&power RK3568_PD_VI>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&cif_clk>,<&ov5648_rst_gpio>,<&ov5648_pwdn_gpio>,<&ov5648_power_gpio>;
+		
+		power-gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_HIGH>;  
+		reset-gpios = <&gpio3 RK_PD4 GPIO_ACTIVE_LOW>;
+		pwdn-gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
+		
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "CameraKing";
+		rockchip,camera-module-lens-name = "Largan";
+		port {
+			gc2145_out: endpoint {
+				remote-endpoint = <&mipi_in_ucam0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};	
+};
+
+&mdio1 {
+	rgmii_phy1: phy@0 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		reg = <0x0>;
+	};
+};
+
+&pinctrl {
+
+	camera{
+		ov5648_rst_gpio:ov5648-rst-gpio{
+			rockchip,pins = <3 RK_PD4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	
+		ov5648_pwdn_gpio:ov5648-pwdn-gpio{
+			rockchip,pins = <3 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+		
+		ov5648_power_gpio:ov5648-power-gpio{
+			rockchip,pins = <3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+	
+	headphone {
+		hp_det: hp-det {
+			rockchip,pins = <2 RK_PD2 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+};
+
+//&rk809_sound {
+//	hp-det-gpio = <&gpio3 RK_PC2 GPIO_ACTIVE_LOW>;
+//};
+
+&rkisp {
+	status = "okay";
+};
+
+&rkisp_mmu {
+	status = "okay";
+};
+
+&rkisp_vir0 {
+	status = "okay";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		isp0_in: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&csidphy0_out>;
+		};
+	};
+};
+
+
+
+&sdmmc1 {
+	max-frequency = <150000000>;
+	supports-sdio;
+	bus-width = <4>;
+	disable-wp;
+	cap-sd-highspeed;
+	cap-sdio-irq;
+	keep-power-in-suspend;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	non-removable;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_cmd &sdmmc1_clk>;
+	sd-uhs-sdr104;
+	status = "okay";
+};
+
+&spdif_8ch {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&spdifm1_tx>;
+};
+
+&uart1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
+};
